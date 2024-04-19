@@ -1,2 +1,4 @@
 # QuestBot
-QuestBot for Sharpist 
+QuestBot for Sharpist
+
+Hope this will be filled with something valuable)
