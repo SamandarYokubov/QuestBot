@@ -17,37 +17,13 @@ client_ = OpenAI(api_key=os.environ["API"])
 red = redis.Redis(os.environ["REDIS_CACHE"], db=1, decode_responses=True)
 celery = Celery('tasks', broker=os.environ["CELERY_BROKER_URL"], backend=os.environ["CELERY_BACKEND_URL"])
 
-def collect_transcriptions(uid, part_no: int, level: int = 1):
-    data = get_data(uid)
-    data = data[:len(data)-1]
-    json_str = f'[{data}]'
-    data = json.loads(json_str, strict=False)
-    response = ''
-    if level == 2:
-        for datum in data:
-            response += f'QUESTION: {datum["question"]}\nANSWER: {datum["answer"]}\n'
-    else:
-        for datum in data:
-                if datum["part_no"] == part_no:
-                    response += f'QUESTION: {datum["question"]}\nANSWER: {datum["answer"]}\n'
-    return response
 
 def execute_sequential(audio_file, question, question_no, sid, part_no, level=0, get_result=False):
     logger.info(get_result)
-    if get_result:
-        result = (transcribe.s(audio_file, question, question_no, sid, part_no) | group(get_feedback.s(question_no, sid, part_no, level, "grammar"), get_feedback.s(question_no, sid, part_no, level, "structure"), get_feedback.s(question_no, sid, part_no, level, "vocab"), get_feedback.s(0, sid, 0, 2))).apply_async()
-        # while not GroupResult(result.id).ready():
-        #     # logger.info(result.status)
-        #     time.sleep(5)
-        response = result.get()
-        logger.info(response)
-
-        return 1
-    if part_no == 2:
-        result = (transcribe.s(audio_file, question, 0, sid, part_no) | group(get_feedback.s(0, sid, part_no, level=1, feed_type="grammar"), get_feedback.s(0, sid, part_no, level=1, feed_type="structure"), get_feedback.s(0, sid, part_no, level=1, feed_type="vocab"))).apply_async()
-    else:
-        result = (transcribe.s(audio_file, question, question_no, sid, part_no) | group(get_feedback.s(question_no, sid, part_no, level, "grammar"), get_feedback.s(question_no, sid, part_no, level, "structure"), get_feedback.s(question_no, sid, part_no, level, "vocab"))).apply_async()
-        logger.info(result)
+    
+    
+    result = (transcribe.s(audio_file, question, 0, sid, part_no) | get_feedback.s(0, sid, part_no, level=1, feed_type="grammar")).apply_async()
+    logger.info(result)
     return result.parent
 
 
@@ -76,6 +52,9 @@ def transcribe(audio_file, question, question_no, sid, part_no):
     red.append(sid, json_str)
     red.expire(sid, 3000, nx=True)
     return data
+
+def extract_audio():
+    pass
 
 @celery.task
 def get_feedback(transcript, question_no, sid, part_no, level, feed_type="NA"):

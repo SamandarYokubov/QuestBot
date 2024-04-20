@@ -39,8 +39,8 @@ async def send_writing(sid: str, part_no: int, essay_prompt: str, essay: str, es
     return Response(content=response.feedback, media_type="application/json")
 
 
-@app.post("/speaking/")
-async def create_upload_file(sid: str, part_no: int = None, question: str = None, question_no: int = None, file: UploadFile | None = None, get_result: bool = False):
+@app.post("/generate_questions/")
+async def create_upload_file(sid: str, course_name: str, course_module: int, question_type: str):
     cl = FileClient(os.environ["PORT"])
     if file:
         response = cl.upload_data(sid=sid, part_no=part_no, question=question, q_no=question_no, in_file=file.file.read(), get_result=get_result)
