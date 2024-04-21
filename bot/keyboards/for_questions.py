@@ -5,8 +5,8 @@ from utils import *
 
 def get_question_types_keyboard() -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
-    builder.add(KeyboardButton(text="Multiple Choice"))
-    builder.add(KeyboardButton(text="Short Answer"))
+    builder.add(KeyboardButton(text="🔡 Multiple Choice"))
+    builder.add(KeyboardButton(text="🅰️ Short Answer"))
     builder.add(KeyboardButton(text=str(back_title)))
     builder.adjust(2)
     return builder.as_markup(resize_keyboard=True)
@@ -40,5 +40,5 @@ def get_mcq_question_inkeyboard(choices: list) -> ReplyKeyboardMarkup:
 
 def assess_keyboard():
     builder = ReplyKeyboardBuilder()
-    builder.add(KeyboardButton(text="Show Results"))
+    builder.add(KeyboardButton(text="➡️ Show Results ⬅️"))
     return builder.as_markup(resize_keyboard=True)

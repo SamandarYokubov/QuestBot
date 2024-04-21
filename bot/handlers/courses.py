@@ -13,7 +13,7 @@ router = Router()
 
 # courses  
 
-@router.message(CourseStates.Course, F.text == "Modules")
+@router.message(CourseStates.Course, F.text == "📖 Modules")
 async def choose_course_modules(message: Message, state: FSMContext):
     user_data = await state.get_data()
     course = user_data["course"]
@@ -22,7 +22,7 @@ async def choose_course_modules(message: Message, state: FSMContext):
     await message.answer("Choose module",
                             reply_markup=get_modules_keyboard(modules))
 
-@router.message(CourseStates.Course, F.text == "My Progress")
+@router.message(CourseStates.Course, F.text == "📈 My Progress")
 async def choose_course_progress(message: Message, state: FSMContext):
     await state.set_state(CourseStates.Progress)
 
