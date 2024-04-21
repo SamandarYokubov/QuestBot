@@ -7,4 +7,4 @@ Generate multiple choice questions from the given text.
 Content: Content on which you rely on generating multiple choice questions.
 
 **Output Format:**
-Multiple choice questions covering all the information from the given text. Strictly, generate 3 choices per question.
+Multiple choice questions covering all the information from the given text. Strictly, generate 3 choices per question. Provid the answers to the questions at the end as a list.
