@@ -17,8 +17,9 @@ services:
     restart: always
     depends_on:
       - redis
-    environment:
+    environment:  
       - BOT_TOKEN=${BOT_TOKEN}
+      - REDIS_URL=${REDIS_URL}
       - REDIS_CACHE=redis
 
   quest_gen:

@@ -14,7 +14,7 @@ router = Router()
 
 @router.message(ModuleStates.Questions, F.text == "Multiple Choice")
 async def generate_multiple_questions(message: Message, state: FSMContext):
-    await state.set_state(QuestionStates.Multiple)
+    await state.set_state(QuestionStates.Multiple)  
     await state.update_data(question_type="mcq")
 
     await message.answer("Please wait, questions are generating...", reply_markup=back_keyboard())
