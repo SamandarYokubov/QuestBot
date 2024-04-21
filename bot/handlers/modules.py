@@ -35,7 +35,7 @@ async def get_module_back(message: Message, state: FSMContext):
     await state.set_state(CourseStates.Course)    
     await message.answer("Choose option", reply_markup=get_course_keyboard())
 
-@router.message(ModuleStates.Module, F.text == "Knowledge")
+@router.message(ModuleStates.Module, F.text == "📄 Knowledge")
 async def get_knowledge(message: Message, state: FSMContext):
     await state.set_state(ModuleStates.Knowledge)
     user_data = await state.get_data()
@@ -44,7 +44,7 @@ async def get_knowledge(message: Message, state: FSMContext):
     await message.answer(f"Here is your treasure:\n\n{module_info}",
                          reply_markup=back_keyboard())
 
-@router.message(ModuleStates.Module, F.text == "Questions")
+@router.message(ModuleStates.Module, F.text == "❓ Questions")
 async def get_questions(message: Message, state: FSMContext):
     await state.set_state(ModuleStates.Questions)    
     await message.answer("Choose question type", reply_markup=get_question_types_keyboard())
