@@ -1,9 +1,9 @@
 menu_items = {
-    "courses": "Courses",
-    "about": "About Us",
+    "courses": "📚 Courses",
+    "about": "ℹ About Us",
 }
 
-back_title = "Go Back"
+back_title = "🔙 Go Back"
 
 courses_list = ["Python", "Project Management", "System Design"]
 

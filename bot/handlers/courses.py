@@ -13,7 +13,7 @@ router = Router()
 
 # courses  
 
-@router.message(CourseStates.Course, F.text == "Modules")
+@router.message(CourseStates.Course, F.text == "📖 Modules")
 async def choose_course_modules(message: Message, state: FSMContext):
     user_data = await state.get_data()
     course = user_data["course"]
@@ -22,7 +22,7 @@ async def choose_course_modules(message: Message, state: FSMContext):
     await message.answer("Choose module",
                             reply_markup=get_modules_keyboard(modules))
 
-@router.message(CourseStates.Course, F.text == "My Progress")
+@router.message(CourseStates.Course, F.text == "📈 My Progress")
 async def choose_course_progress(message: Message, state: FSMContext):
     await state.set_state(CourseStates.Progress)
 
@@ -30,7 +30,7 @@ async def choose_course_progress(message: Message, state: FSMContext):
     user_progres = user_data["user_progress"]
     course = user_data["course"]
     course_marks = user_progres[course]
-    progress_result = "Your progress:\n\n"
+    progress_result = "Your progress for Multiple Choice Questions:\n\n"
     for key, value in course_marks.items():
         progress_result += f"{key} -> {value}\n"
     await message.answer(progress_result, reply_markup=back_keyboard())

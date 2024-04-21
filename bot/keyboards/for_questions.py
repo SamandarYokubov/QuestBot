@@ -5,8 +5,8 @@ from utils import *
 
 def get_question_types_keyboard() -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
-    builder.add(KeyboardButton(text="Multiple Choice"))
-    builder.add(KeyboardButton(text="Short Answer"))
+    builder.add(KeyboardButton(text="🔡 Multiple Choice"))
+    builder.add(KeyboardButton(text="🅰️ Short Answer"))
     builder.add(KeyboardButton(text=str(back_title)))
     builder.adjust(2)
     return builder.as_markup(resize_keyboard=True)

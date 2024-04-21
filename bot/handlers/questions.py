@@ -13,7 +13,7 @@ import requests
 
 router = Router()
 
-@router.message(ModuleStates.Questions, F.text == "Multiple Choice")
+@router.message(ModuleStates.Questions, F.text == "🔡 Multiple Choice")
 async def generate_multiple_questions(message: Message, state: FSMContext):
     await state.set_state(QuestionStates.Multiple)  
     await state.update_data(question_type="mcq")
@@ -28,7 +28,7 @@ async def generate_multiple_questions(message: Message, state: FSMContext):
     await message.answer("Are you ready?", reply_markup=get_question_start_inkeyboard())
 
 
-@router.message(ModuleStates.Questions, F.text == "Short Answer")
+@router.message(ModuleStates.Questions, F.text == "🅰️ Short Answer")
 async def generate_short_questions(message: Message, state: FSMContext):
     await state.set_state(QuestionStates.Short)    
     await state.update_data(question_type="saq")
@@ -182,13 +182,3 @@ async def assess(message: Message, state: FSMContext):
 
     await state.set_state(CourseStates.Module)
 
-
-# @router.message(QuestionStates.Assessment, F.text == back_title)
-# async def assess_back(message: Message, state: FSMContext):
-#     await state.set_state(ModuleStates.Questions)
-#     await state.update_data(questions=[], question_type="", answers=[], cur_question_index=0)
-
-#     await message.answer(
-#         text="Choose option",
-#         reply_markup=get_question_types_keyboard()
-#     )
