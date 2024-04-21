@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    image: api
+    ports:
+      - "10000:80"
+
+  bot:
+    build:
+      context: .
+      dockerfile: ./bot/Dockerfile
+    image: tg_bot
+    restart: always
+    depends_on:
+      - redis
+    environment:
+      - ENV=${ENV}
+      - BOT_TOKEN=${BOT_TOKEN}
+      - REDIS_CACHE=redis
+
+  quest_gen:
+    build:
+      context: .
+      dockerfile: ./quest_gen_service/Dockerfile
+    image: quest_server
+    restart: always
+    environment:
+      - API=${API}
+
+  redis:
+    image: redis:latest
+    restart: always
