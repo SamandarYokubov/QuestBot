@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+
+service QuestService{
+    rpc get_questions(Request) returns (Response) {}
+}
+
+message Request {
+    string user_id = 1;
+    string course_name = 2;
+    int32 course_module = 3;
+    string question_type = 4;
+    string content_type = 5;
+}
+
+message Response {
+    string questions = 1;
+}
