@@ -6,8 +6,8 @@ def get_courses_keyboard() -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
     for course_name in courses_list:
         builder.add(KeyboardButton(text=str(course_name)))
-    builder.adjust(3)   
     builder.add(KeyboardButton(text=str(back_title)))
+    builder.adjust(3)   
     return builder.as_markup(resize_keyboard=True)
 
 

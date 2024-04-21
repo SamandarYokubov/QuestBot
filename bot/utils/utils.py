@@ -1,6 +1,10 @@
 menu_items = {
     "courses": "📚 Courses",
+<<<<<<< HEAD
     "about": "ℹ About Us",
+=======
+    "about": "ℹ️ About Us",
+>>>>>>> 17ef615d47c758a4300e5a7571951b6f0d693ec0
 }
 
 back_title = "🔙 Go Back"

@@ -68,28 +68,28 @@ async def game_start(callback: CallbackQuery, state: FSMContext):
     question = questions[0]["question"]
     if(question_type == "mcq"):
         choices = questions[0]["choices"]
-        await callback.answer()
         await callback.message.answer(
             text=f"Question:\n\n{question}",
             reply_markup = get_mcq_question_inkeyboard(choices=choices)
         )
     else:
         await state.set_state(QuestionStates.Answering)
-        await callback.answer()
         await callback.message.answer(
             text=f"Question:\n\n{question}"
         )
+    await callback.answer()
 
 
 @router.callback_query(F.data == "answering_stop")
 async def game_stop(callback: CallbackQuery, state: FSMContext):    
     await state.set_state(ModuleStates.Questions)
     await state.update_data(questions=[], question_type="", answers=[], cur_question_index=0)
-
+    
     await callback.message.answer(
         text="Cancelled\n\nChoose option",
         reply_markup=get_question_types_keyboard()
     )
+    await callback.answer()
 
 @router.callback_query(F.data.startswith("mcq_"))
 async def mcq_answered(callback: CallbackQuery, state: FSMContext):
@@ -104,19 +104,18 @@ async def mcq_answered(callback: CallbackQuery, state: FSMContext):
     questions_count = len(user_data["questions"])
     if(next_question_index == questions_count):
         await state.set_state(QuestionStates.Assessment)
-        return await callback.message.answer(text="Assessing...",
+        await callback.message.answer(text="Assessing...",
                                              reply_markup=assess_keyboard())
-    
+        await callback.answer()
     question = user_data["questions"][next_question_index]["question"]
     choices = user_data["questions"][next_question_index]["choices"] 
 
-    await state.update_data(cur_question_index=next_question_index)
-
-    await callback.answer()
+    await state.update_data(cur_question_index=next_question_index)    
     await callback.message.answer(
         text=f"Question:\n\n{question}",
         reply_markup = get_mcq_question_inkeyboard(choices=choices)
     )
+    await callback.answer()
 
 
     
@@ -146,7 +145,7 @@ async def answer_short(message: Message, state: FSMContext):
     
 
 
-@router.message(QuestionStates.Assessment, F.text == "Show Results")
+@router.message(QuestionStates.Assessment, F.text == "➡️ Show Results ⬅️")
 async def assess(message: Message, state: FSMContext):
     user_data = await state.get_data()
     await state.update_data(user_data["answers"].append(message.text))
