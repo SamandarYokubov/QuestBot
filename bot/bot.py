@@ -22,7 +22,7 @@ logging.basicConfig(
 
 bot = Bot(config.bot_token.get_secret_value())
 
-storage = RedisStorage.from_url('redis://62.171.186.99:6379/0')
+storage = RedisStorage.from_url(config.redis_url.get_secret_value())
 
 dp = Dispatcher(storage=storage)
 
