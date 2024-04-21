@@ -1,10 +1,10 @@
 import asyncio
 import logging
+import os
 
 from aiogram.types import BotCommand
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.redis import RedisStorage
-from config_reader import config 
 
 from handlers import common, courses, about, modules, progress, questions
 
@@ -20,9 +20,9 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 )
 
-bot = Bot(config.bot_token.get_secret_value())
+bot = Bot(os.environ["BOT_TOKEN"])
 
-storage = RedisStorage.from_url(config.redis_url.get_secret_value())
+storage = RedisStorage.from_url(os.environ["REDIS_URL"])
 
 dp = Dispatcher(storage=storage)
 
