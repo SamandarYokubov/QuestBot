@@ -45,7 +45,7 @@ Posts parameters to the Question Generation Service or Speech2text service and p
 
 
 ## Telegram Bot
-Bot address: @questbyaibot [QuestBot](t.me/questbyaibot)
+Bot address: @questbyaibot [QuestBot](https://t.me/questbyaibot)
 
 Telegram Bot has been used to represent the functionality of the AI system that generates pesonal course-module based questionnaire. Courses and their content were provided only for the testing purposing.
 
