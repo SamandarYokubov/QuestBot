@@ -51,7 +51,7 @@ def generate_questions(temperature, text, question_type, number_of_questions=10)
             {"role": "user", "content": text},
         ],
     )
-    
+    #sss
     logger.info(response)
     
     return (response.choices[0].message.content)
