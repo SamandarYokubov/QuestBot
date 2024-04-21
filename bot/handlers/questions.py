@@ -234,6 +234,7 @@ async def assess(message: Message, state: FSMContext):
     course = user_data["course"]
     module = user_data["module"]
     modules = course_modules[course]
+    user_progres = user_data["user_progress"]
     # answer assessing proccess
 
     if user_data["question_type"] == "saq":
@@ -253,7 +254,7 @@ async def assess(message: Message, state: FSMContext):
     total_mark = 0
     for user_answer, right_answer in zip(user_answers, right_answers):
         if(user_answer == right_answer):
-            total_mark = total_mark + 1
+            total_mark = total_mark + 10
 
     total_mark = total_mark / len(right_answers)
 
