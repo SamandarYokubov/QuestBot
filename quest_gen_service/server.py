@@ -42,7 +42,7 @@ def get_prompt_from_file(question_type):
 def generate_questions(temperature, text, question_type, number_of_questions=10):
     
     system_prompt = get_prompt_from_file(question_type=question_type)
-    
+    system_prompt += f"\nThe number of questions to generate is {number_of_questions}"
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
         temperature=temperature,
@@ -66,11 +66,12 @@ class QuestService(quest_service_pb2_grpc.QuestServiceServicer):
             def get_questions(self, request, context):
                 # logging.info(request.text)
                 # gpt_feedback, score = generate_feedback(temperature=0.4, text=request.text, level=request.level, part=request.part, feed_type=request.feed_type)
+                questions = generate_questions(temperature=0.5, text=request.course_name, question_type=request.question_type)
                 # gpt_feedback = gpt_feedback.replace('"', '\'')
                 # gpt_feedback = gpt_feedback + "\n"
                 # gpt_feedback = gpt_feedback.splitlines(True)[0].split(" ")[1]
                 return quest_service_pb2.Response(
-                    questions="hfgfghjhgjk"
+                    questions=questions
                 )
 
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
