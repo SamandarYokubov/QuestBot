@@ -82,6 +82,8 @@ saq_questions = [
         {"question": "Describe me Bob?"}
 ]
 
+answers = {"answers": ["", "", ""]}
+
 answers_marks = [
     1.0,
     0.5,
