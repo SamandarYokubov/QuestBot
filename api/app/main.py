@@ -26,7 +26,7 @@ app = FastAPI()
 async def generate_questions(id: str, course_name: str, course_module: int, question_type: str, content_type: str):
     cl = Client("quest_gen:50052")
     
-    response = cl.call_server(id=id, course_name=course_name, course_module=course_module, question_type=question_type, content_type=content_type)
+    response = cl.call_server(user_id=id, course_name=course_name, course_module=course_module, question_type=question_type, content_type=content_type)
 
     
     return Response(content=json.dumps(response.questions), media_type="application/json")
