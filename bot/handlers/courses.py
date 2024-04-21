@@ -27,8 +27,9 @@ async def choose_course_progress(message: Message, state: FSMContext):
     await state.set_state(CourseStates.Progress)
 
     user_data = await state.get_data()
+    user_progres = user_data["user_progress"]
     course = user_data["course"]
-    course_marks = course_progress[course]
+    course_marks = user_progres[course]
     progress_result = "Your progress:\n\n"
     for key, value in course_marks.items():
         progress_result += f"{key} -> {value}\n"

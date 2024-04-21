@@ -1,6 +1,5 @@
 menu_items = {
     "courses": "Courses",
-    "progress": "My Progress",
     "about": "About Us",
 }
 

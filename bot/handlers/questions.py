@@ -8,6 +8,7 @@ import time
 from states import QuestionStates, ModuleStates, CourseStates
 from keyboards import *
 from utils import *
+import requests
 
 
 router = Router()
@@ -19,7 +20,7 @@ async def generate_multiple_questions(message: Message, state: FSMContext):
 
     await message.answer("Please wait, questions are generating...", reply_markup=back_keyboard())
 
-    
+
     time.sleep(3)
 
     await state.update_data(questions=mcq_questions)
@@ -154,16 +155,17 @@ async def assess(message: Message, state: FSMContext):
 
     course = user_data["course"]
     module = user_data["module"]
+    user_progres = user_data["user_progress"]
     modules = course_modules[course]
 
     total_mark = sum(answers_marks) / len(answers_marks)
 
-    if(course_progress[course][module] < total_mark):
+    if(user_progres[course][module] < total_mark):
         await message.answer(
             text = f"Excellent\n\nYour mark for {module} is {total_mark}",
             reply_markup=get_modules_keyboard(modules)
         )
-    elif(course_progress[course][module] > total_mark):
+    elif(user_progres[course][module] > total_mark):
         await message.answer(
             text = f"Need to repeat\n\nYour mark for {module} is {total_mark}",
             reply_markup=get_modules_keyboard(modules)
@@ -174,9 +176,9 @@ async def assess(message: Message, state: FSMContext):
             reply_markup=get_modules_keyboard(modules)
         ) 
 
-    course_progress[course][module] = total_mark
+    user_progres[course][module] = total_mark
 
-    await state.update_data(questions=[], question_type="", answers=[], cur_question_index=0)
+    await state.update_data(questions=[], question_type="", answers=[], cur_question_index=0, user_progress=user_progres)
 
     await state.set_state(CourseStates.Module)
 

@@ -13,7 +13,7 @@ router = Router()
 @router.message(Command(commands=["start"]))
 async def cmd_start(message: Message, state:FSMContext):
     await state.clear()
-    await state.update_data(id=message.from_user.id, first_name=message.from_user.first_name)
+    await state.update_data(id=message.from_user.id, first_name=message.from_user.first_name, user_progress=course_progress) 
     await message.answer(
         text = f"Welcome {message.from_user.first_name} {message.from_user.last_name}",
         reply_markup = menu_items_keyboard(menu_items=menu_items.values())
