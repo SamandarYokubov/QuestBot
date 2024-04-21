@@ -8,7 +8,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse, Response
 
 from client import Client
-from utils import parse_as_json
+from .utils import parse_as_json
 
 
 
