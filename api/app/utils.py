@@ -1,13 +1,13 @@
+import logging
+
 async def parse_as_json(request: str):
-    data = {
-        "question": 1,
-        "choices": []
-    }
+    
     alist = []
-    for quest in request.split("\n\n"):
+    questions, answers = request.split("Answers")
+    logging.info(questions)
+    for quest in questions.split("\n\n"):
+        logging.info(quest)
         response = quest.split("\n")
-        data["question"] = response[0]
-        data["choices"] = response[1:]
-        alist.append(data)
-    return {"mcq_questions": alist}
-        
+        alist.append({"question": response[0], "choices": response[1:]})
+    return {"mcq_questions": alist,
+            "answers": answers.split("\n")}

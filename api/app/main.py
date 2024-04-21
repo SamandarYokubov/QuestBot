@@ -30,5 +30,6 @@ async def generate_questions(id: str, course_name: str, course_module: int, ques
     response = cl.call_server(user_id=id, course_name=course_name, course_module=course_module, question_type=question_type, content_type=content_type)
 
     logger.info(response.questions)
-    logger.info(await parse_as_json(response.questions))
-    return Response(content=json.dumps(response.questions), media_type="application/json")
+    data = await parse_as_json(response.questions)
+    logger.info(data)
+    return Response(content=json.dumps(data), media_type="application/json")
