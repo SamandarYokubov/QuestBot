@@ -13,7 +13,7 @@ router = Router()
 @router.message(Command(commands=["start"]))
 async def cmd_start(message: Message, state:FSMContext):
     await state.clear()
-    await state.update_data(id=message.from_user.id, first_name=message.from_user.first_name, user_progress=course_progress) 
+    await state.update_data(user_id=message.from_user.id, first_name=message.from_user.first_name, user_progress=course_progress) 
     await message.answer(
         text = f"Welcome {message.from_user.first_name} {message.from_user.last_name}",
         reply_markup = menu_items_keyboard(menu_items=menu_items.values())
@@ -29,7 +29,15 @@ async def choose_menu(message: Message, state: FSMContext):
                              reply_markup=get_courses_keyboard())
         return await state.set_state(InitialStates.Courses)
     elif(message.text == menu_items["about"]):
-        await message.answer("We aim to check your progress",
+        about_text = "\nThis bot is an example how to use AI to check progress while completing courses\n\n"
+        about_text += "How to use this bot?\n"
+        about_text += " 1) Choose Course\n"
+        about_text += " 2) Choose Module\n"
+        about_text += " 3) Get knowledge\n"
+        about_text += " 4) Check your progress with Questions prepared by AI\n"
+        about_text += " 5) Check your progress\n\n"
+        about_text += " And keeeep learning! :)\n"
+        await message.answer(about_text,
                              reply_markup=back_keyboard())
         return await state.set_state(InitialStates.About)
 

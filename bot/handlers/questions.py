@@ -9,7 +9,10 @@ from states import QuestionStates, ModuleStates, CourseStates
 from keyboards import *
 from utils import *
 import requests
+import logging
 
+BASE_URL = "http://api:80"
+ENDPOINT = "generate_questions/"
 
 router = Router()
 
@@ -18,12 +21,46 @@ async def generate_multiple_questions(message: Message, state: FSMContext):
     await state.set_state(QuestionStates.Multiple)  
     await state.update_data(question_type="mcq")
 
+    user_data = await state.get_data()
+    user_id = user_data["user_id"]
+    course = user_data["course"]
+    module = user_data["module"]
+    module_id = course_modules[course].index(module)
+    
     await message.answer("Please wait, questions are generating...", reply_markup=back_keyboard())
 
+    response = requests.post(BASE_URL+"/"+ENDPOINT,
+                              params={"id":str(user_id),
+                                    "course_name": str(course),
+                                    "course_module": module_id,
+                                    "question_type":"multiple_choice",
+                                    "content_type":"text"})
+    
+    counter = 5
+    while counter > 0 and response.status_code == 500 : 
+        logging.info("ai service 500")
+        time.sleep(2)
+        response = requests.post(BASE_URL+"/"+ENDPOINT,
+                        params={"id":str(user_id),
+                            "course_name": str(course),
+                            "course_module": module_id,
+                            "question_type":"multiple_choice",
+                            "content_type":"text"})
+        counter = counter - 1
 
-    time.sleep(3)
+    if response.status_code == 500:
+        logging.info("ai service doesn't work")
+        await state.set_state(ModuleStates.Questions)
+        await state.update_data(questions=[], question_type="", answers=[], mcq_answers=[], cur_question_index=0)
 
-    await state.update_data(questions=mcq_questions)
+        return await message.answer(
+            text="AI service currently unavailabel, please ttry later!\n\nChoose option",
+            reply_markup=get_question_types_keyboard()
+        )
+    response_data = response.json()
+
+    logging.info(response_data["mcq_questions"])
+    await state.update_data(questions=response_data["mcq_questions"], mcq_answers=response_data["answers"])
     await state.update_data(answers=[])
     await message.answer("Are you ready?", reply_markup=get_question_start_inkeyboard())
 
@@ -33,12 +70,46 @@ async def generate_short_questions(message: Message, state: FSMContext):
     await state.set_state(QuestionStates.Short)    
     await state.update_data(question_type="saq")
 
+    user_data = await state.get_data()
+    user_id = user_data["user_id"]
+    course = user_data["course"]
+    module = user_data["module"]
+    module_id = course_modules[course].index(module)
+
     await message.answer("Please wait, questions are generating...", reply_markup=back_keyboard())
 
-    time.sleep(3)
+    response = requests.post(BASE_URL+"/"+ENDPOINT,
+                                params={"id":str(user_id),
+                                        "course_name": str(course),
+                                        "course_module": module_id,
+                                        "question_type":"multiple_choice",
+                                        "content_type":"short_answer"})
+        
+    counter = 5
+    while counter > 0 and response.status_code == 500 : 
+        logging.info("ai service 500")
+        time.sleep(2)
+        response = requests.post(BASE_URL+"/"+ENDPOINT,
+                        params={"id":str(user_id),
+                            "course_name": str(course),
+                            "course_module": module_id,
+                            "question_type":"multiple_choice",
+                            "content_type":"short_answer"})
+        counter = counter - 1
+
+    if response.status_code == 500:
+        logging.info("ai service doesn't work")
+        await state.set_state(ModuleStates.Questions)
+        await state.update_data(questions=[], question_type="", answers=[], mcq_answers=[], cur_question_index=0)
+
+        return await message.answer(
+            text="AI service currently unavailabel, please ttry later!\n\nChoose option",
+            reply_markup=get_question_types_keyboard()
+        )
+    response_data = response.json()
 
     
-    await state.update_data(questions=saq_questions)
+    await state.update_data(questions=response_data["mcq_questions"])
     await state.update_data(answers=[])
     await message.answer("Are you ready?", reply_markup=get_question_start_inkeyboard())
 
@@ -48,7 +119,7 @@ async def generate_short_questions(message: Message, state: FSMContext):
 @router.message(QuestionStates.Answering, F.text == back_title)
 async def go_back(message: Message, state: FSMContext):
     await state.set_state(ModuleStates.Questions)
-    await state.update_data(questions=[], question_type="", answers=[], cur_question_index=0)
+    await state.update_data(questions=[], question_type="", answers=[], mcq_answers=[], cur_question_index=0)
 
     await message.answer(
         text="Cancelled\n\nChoose option",
@@ -83,7 +154,7 @@ async def game_start(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "answering_stop")
 async def game_stop(callback: CallbackQuery, state: FSMContext):    
     await state.set_state(ModuleStates.Questions)
-    await state.update_data(questions=[], question_type="", answers=[], cur_question_index=0)
+    await state.update_data(questions=[], question_type="", answers=[], mcq_answers = [], cur_question_index=0)
     
     await callback.message.answer(
         text="Cancelled\n\nChoose option",
@@ -97,7 +168,8 @@ async def mcq_answered(callback: CallbackQuery, state: FSMContext):
 
     callback_data_chunk = callback.data.split('_')
     answer = callback_data_chunk[1]
-    await state.update_data(user_data["answers"].append(answer))
+    user_data["answers"].append(answer)
+    await state.update_data(answers=user_data["answers"])
                             
     next_question_index = user_data["cur_question_index"] + 1
 
@@ -106,19 +178,23 @@ async def mcq_answered(callback: CallbackQuery, state: FSMContext):
         await state.set_state(QuestionStates.Assessment)
         await callback.message.answer(text="Assessing...",
                                              reply_markup=assess_keyboard())
-        await callback.answer()
+        return await callback.answer()
+    
     question = user_data["questions"][next_question_index]["question"]
     choices = user_data["questions"][next_question_index]["choices"] 
+
+    if(question == '' or len(choices) == 0):
+        await state.set_state(QuestionStates.Assessment)
+        await callback.message.answer(text="Assessing...",
+                                             reply_markup=assess_keyboard())
+        return await callback.answer()
 
     await state.update_data(cur_question_index=next_question_index)    
     await callback.message.answer(
         text=f"Question:\n\n{question}",
         reply_markup = get_mcq_question_inkeyboard(choices=choices)
     )
-    await callback.answer()
-
-
-    
+    await callback.answer()    
 
 
 @router.message(QuestionStates.Answering, F.text)
@@ -131,10 +207,15 @@ async def answer_short(message: Message, state: FSMContext):
     questions_count = len(user_data["questions"])
     if(next_question_index == questions_count):
         await state.set_state(QuestionStates.Assessment)
-        await message.answer("Assessing...", reply_markup=assess_keyboard())
+        return await message.answer("Assessing...", reply_markup=assess_keyboard())
 
     question = user_data["questions"][next_question_index]["question"]
 
+    if(question == ''):
+        await state.set_state(QuestionStates.Assessment)
+        return await message.answer(text="Assessing...",
+                            reply_markup=assess_keyboard())
+    
     await state.update_data(cur_question_index=next_question_index)
 
     await message.answer(
@@ -150,14 +231,31 @@ async def assess(message: Message, state: FSMContext):
     user_data = await state.get_data()
     await state.update_data(user_data["answers"].append(message.text))
 
-    # answer assessing proccess
-
     course = user_data["course"]
     module = user_data["module"]
-    user_progres = user_data["user_progress"]
     modules = course_modules[course]
+    # answer assessing proccess
 
-    total_mark = sum(answers_marks) / len(answers_marks)
+    if user_data["question_type"] == "saq":
+        await state.update_data(questions=[], question_type="", answers=[], mcq_answers = [], cur_question_index=0)
+        await state.set_state(CourseStates.Module)
+
+        return  await message.answer(
+            text = f"Well done!\nSorry, but short answer assessment process is under technical developement.",
+            reply_markup=get_modules_keyboard(modules)
+        )
+    
+
+    user_answers = user_data["answers"]
+    right_answers = user_data["mcq_answers"]
+    
+
+    total_mark = 0
+    for user_answer, right_answer in zip(user_answers, right_answers):
+        if(user_answer == right_answer):
+            total_mark = total_mark + 1
+
+    total_mark = total_mark / len(right_answers)
 
     if(user_progres[course][module] < total_mark):
         await message.answer(
@@ -177,7 +275,7 @@ async def assess(message: Message, state: FSMContext):
 
     user_progres[course][module] = total_mark
 
-    await state.update_data(questions=[], question_type="", answers=[], cur_question_index=0, user_progress=user_progres)
+    await state.update_data(questions=[], question_type="", answers=[], mcq_answers = [], cur_question_index=0, user_progress=user_progres)
 
     await state.set_state(CourseStates.Module)
 

@@ -15,18 +15,18 @@ course_modules = {
 
 course_progress = {
     "Python" : {
-        "Variables": 0,
-        "Control flow": 0,
-        "Functions": 0
+        "Variables": float(0),
+        "Control flow": float(0),
+        "Functions": float(0)
     },
     "Project Management": {
-        "Agile": 0,
-        "Scrum": 0
+        "Agile": float(0),
+        "Scrum": float(0)
     },
     "System Design": {
-        "Distributed Message Queue": 0,
-        "Load Balancer": 0,
-        "API Gateway": 0
+        "Distributed Message Queue": float(0),
+        "Load Balancer": float(0),
+        "API Gateway": float(0)
     }
 }
 
@@ -86,6 +86,6 @@ answers = {"answers": ["", "", ""]}
 answers_marks = [
     1.0,
     0.5,
-    0.0,
+    float(0),
     1.0
 ]
