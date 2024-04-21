@@ -34,8 +34,8 @@ def get_mcq_question_inkeyboard(choices: list) -> ReplyKeyboardMarkup:
             text=choice,
             callback_data=call_data)
         )
-
-    return builder.as_markup()
+    builder.adjust(1)
+    return builder.as_markup(resize_keyboard=True)
 
 
 def assess_keyboard():

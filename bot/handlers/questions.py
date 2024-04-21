@@ -27,11 +27,13 @@ async def generate_multiple_questions(message: Message, state: FSMContext):
     module = user_data["module"]
     module_id = course_modules[course].index(module)
     
-    await message.answer("Please wait, questions are generating...", reply_markup=back_keyboard())
+    await message.answer("Please wait, questions are being generated...", reply_markup=back_keyboard())
+
+    course_name = course + "&" + module
 
     response = requests.post(BASE_URL+"/"+ENDPOINT,
                               params={"id":str(user_id),
-                                    "course_name": str(course),
+                                    "course_name": str(course_name),
                                     "course_module": module_id,
                                     "question_type":"multiple_choice",
                                     "content_type":"text"})
@@ -42,7 +44,7 @@ async def generate_multiple_questions(message: Message, state: FSMContext):
         time.sleep(2)
         response = requests.post(BASE_URL+"/"+ENDPOINT,
                         params={"id":str(user_id),
-                            "course_name": str(course),
+                            "course_name": str(course_name),
                             "course_module": module_id,
                             "question_type":"multiple_choice",
                             "content_type":"text"})
@@ -59,8 +61,17 @@ async def generate_multiple_questions(message: Message, state: FSMContext):
         )
     response_data = response.json()
 
+
+
     logging.info(response_data["mcq_questions"])
-    await state.update_data(questions=response_data["mcq_questions"], mcq_answers=response_data["answers"])
+    logging.info(response_data["answers"])
+    mcq_answers_list = []
+
+    for answer in response_data["answers"]:
+        if(len(answer) > 3):
+            mcq_answers_list.append(answer)
+
+    await state.update_data(questions=response_data["mcq_questions"], mcq_answers=mcq_answers_list)
     await state.update_data(answers=[])
     await message.answer("Are you ready?", reply_markup=get_question_start_inkeyboard())
 
@@ -76,11 +87,13 @@ async def generate_short_questions(message: Message, state: FSMContext):
     module = user_data["module"]
     module_id = course_modules[course].index(module)
 
-    await message.answer("Please wait, questions are generating...", reply_markup=back_keyboard())
+    course_name = course + "&" + module
+
+    await message.answer("Please wait, questions are being generated...", reply_markup=back_keyboard())
 
     response = requests.post(BASE_URL+"/"+ENDPOINT,
                                 params={"id":str(user_id),
-                                        "course_name": str(course),
+                                        "course_name": str(course_name),
                                         "course_module": module_id,
                                         "question_type":"multiple_choice",
                                         "content_type":"short_answer"})
@@ -91,7 +104,7 @@ async def generate_short_questions(message: Message, state: FSMContext):
         time.sleep(2)
         response = requests.post(BASE_URL+"/"+ENDPOINT,
                         params={"id":str(user_id),
-                            "course_name": str(course),
+                            "course_name": str(course_name),
                             "course_module": module_id,
                             "question_type":"multiple_choice",
                             "content_type":"short_answer"})
@@ -165,13 +178,14 @@ async def game_stop(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("mcq_"))
 async def mcq_answered(callback: CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
-
+    question_cur_index = user_data["cur_question_index"]
     callback_data_chunk = callback.data.split('_')
-    answer = callback_data_chunk[1]
+    answer = callback_data_chunk[1].strip()
     user_data["answers"].append(answer)
+    logging.info(user_data["answers"])
     await state.update_data(answers=user_data["answers"])
                             
-    next_question_index = user_data["cur_question_index"] + 1
+    next_question_index = question_cur_index + 1
 
     questions_count = len(user_data["questions"])
     if(next_question_index == questions_count):
@@ -253,6 +267,8 @@ async def assess(message: Message, state: FSMContext):
 
     total_mark = 0
     for user_answer, right_answer in zip(user_answers, right_answers):
+        right_answer = right_answer[3:]
+        right_answer = right_answer.strip()
         if(user_answer == right_answer):
             total_mark = total_mark + 10
 
