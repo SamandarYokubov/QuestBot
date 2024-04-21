@@ -18,7 +18,6 @@ services:
     depends_on:
       - redis
     environment:
-      - ENV=${ENV}
       - BOT_TOKEN=${BOT_TOKEN}
       - REDIS_CACHE=redis
 
